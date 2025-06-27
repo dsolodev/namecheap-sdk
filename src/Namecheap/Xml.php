@@ -1,15 +1,21 @@
-<?php 
+<?php
+
+declare(strict_types=1);
+
 namespace Namecheap;
+
 use DOMDocument;
 use Exception;
 
 /**
- * @Usage : $arr = Xml::createArray($xml);
+ * XML utility class for converting XML to array
+ *
+ * @usage $arr = Xml::createArray($xml);
  */
-
-class Xml {
-    private static $xml = null;
-    private static $encoding = 'UTF-8';
+final class Xml
+{
+    private static ?DOMDocument $xml = null;
+    private static string $encoding = "UTF-8";
 
     /**
      * Initialize the root XML node [optional].
@@ -18,10 +24,13 @@ class Xml {
      * @param $encoding
      * @param $format_output
      */
-    public static function init($version = '1.0', $encoding = 'UTF-8', $format_output = true)
-    {
+    public static function init(
+        string $version = "1.0",
+        string $encoding = "UTF-8",
+        bool $formatOutput = true
+    ): void {
         self::$xml = new DOMDocument($version, $encoding);
-        self::$xml->formatOutput = $format_output;
+        self::$xml->formatOutput = $formatOutput;
         self::$encoding = $encoding;
     }
     /**
@@ -33,22 +42,29 @@ class Xml {
      *
      * @return array
      */
-    public static function &createArray($input_xml)
+    public static function createArray(string|DOMDocument $inputXml): array
     {
         $xml = self::getXMLRoot();
-        if (is_string($input_xml)) {
-            $parsed = $xml->loadXML($input_xml);
+        $array = [];
+        if (is_string($inputXml)) {
+            $parsed = $xml->loadXML($inputXml);
             if (!$parsed) {
-                throw new Exception('[XML2Array] Error parsing the XML string.');
+                throw new Exception(
+                    "[XML2Array] Error parsing the XML string."
+                );
             }
         } else {
-            if (!$input_xml instanceof DOMDocument) {
-                throw new Exception('[XML2Array] The input XML object should be of type: DOMDocument.');
+            if (!$inputXml instanceof DOMDocument) {
+                throw new Exception(
+                    "[XML2Array] The input XML object should be of type: DOMDocument."
+                );
             }
-            $xml = self::$xml = $input_xml;
+            $xml = self::$xml = $inputXml;
         }
-        $array[$xml->documentElement->tagName] = self::convert($xml->documentElement);
-        self::$xml = null;    // clear the xml node in the class for 2nd time use.
+        $array[$xml->documentElement->tagName] = self::convert(
+            $xml->documentElement
+        );
+        self::$xml = null; // clear the xml node in the class for 2nd time use
         return $array;
     }
 
@@ -59,18 +75,16 @@ class Xml {
      *
      * @return mixed
      */
-    private static function &convert($node)
+    private static function convert(\DOMNode $node): mixed
     {
         $output = [];
         switch ($node->nodeType) {
             case XML_CDATA_SECTION_NODE:
-                $output = trim($node->textContent);
-                break;
             case XML_TEXT_NODE:
                 $output = trim($node->textContent);
                 break;
             case XML_ELEMENT_NODE:
-                // for each child node, call the covert function recursively
+                // for each child node, call the convert function recursively
                 for ($i = 0, $m = $node->childNodes->length; $i < $m; $i++) {
                     $child = $node->childNodes->item($i);
                     $v = self::convert($child);
@@ -82,22 +96,22 @@ class Xml {
                         }
                         $output[$t][] = $v;
                     } else {
-                        //check if it is not an empty text node
-                        if ($v !== '') {
+                        // check if it is not an empty text node
+                        if ($v !== "") {
                             $output = $v;
                         }
                     }
                 }
                 if (is_array($output)) {
-                    // if only one node of its kind, assign it directly instead if array($value);
+                    // if only one node of its kind, assign it directly instead of array($value)
                     foreach ($output as $t => $v) {
                         if (is_array($v) && count($v) == 1) {
                             $output[$t] = $v[0];
                         }
                     }
                     if (empty($output)) {
-                        //for empty nodes
-                        $output = '';
+                        // for empty nodes
+                        $output = "";
                     }
                 }
                 // loop through the attributes and collect them
@@ -106,12 +120,12 @@ class Xml {
                     foreach ($node->attributes as $attrName => $attrNode) {
                         $a[$attrName] = (string) $attrNode->value;
                     }
-                    // if its an leaf node, store the value in @value instead of directly storing it.
+                    // if it's a leaf node, store the value in @value instead of directly storing it
                     if (!is_array($output) && !empty($output)) {
-                        $output = ['__text' => $output];
+                        $output = ["__text" => $output];
                         if (count($a)) {
                             foreach ($a as $kk => $vv) {
-                                $output['_'.$kk] = $vv;
+                                $output["_" . $kk] = $vv;
                             }
                         }
                     } else {
@@ -120,7 +134,7 @@ class Xml {
                         }
 
                         foreach ($a as $k => $v) {
-                            $output['_'.$k] = $v;       
+                            $output["_" . $k] = $v;
                         }
                     }
                 }
@@ -133,7 +147,7 @@ class Xml {
      *
      * @return DOMDocument
      */
-    private static function getXMLRoot()
+    private static function getXMLRoot(): DOMDocument
     {
         if (empty(self::$xml)) {
             self::init();
@@ -141,5 +155,3 @@ class Xml {
         return self::$xml;
     }
 }
-
-?>

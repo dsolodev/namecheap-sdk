@@ -1,10 +1,16 @@
-<?php 
+<?php
+
+declare(strict_types=1);
 
 namespace Namecheap\Exception;
 
-class NamecheapExceptionCodes {
-	
-	public static self::$ncErrorCodes = [
+/**
+ * Namecheap API error codes and messages
+ */
+final class NamecheapExceptionCodes
+{
+
+    public static array $ncErrorCodes = [
 	    # Common for all commands
 	    'globalErrorCodes' => [
 	    	1010101 => 	'Parameter APIUser is missing',
@@ -25,7 +31,7 @@ class NamecheapExceptionCodes {
 			1016103 => 	'Parameter UserName is unauthorized',
 			1017103 => 	'Parameter UserName is disabled or locked',
 	    ],
-		
+
 		# namecheap.domains.getList
 		5019169 =>	'Unknown exceptions while retriving Domain list',
 
@@ -88,7 +94,7 @@ class NamecheapExceptionCodes {
 			3031510	=> 'Error response from Enom when the error count != 0',
 			3011511	=> 'UnKnown response from Provider',
 		],
-		
+
 
 		# namecheap.domains.reactivate
 		2033409	=> 'Possibly a logical error in authentication phase. Order chargeable for Username is not found',
@@ -347,30 +353,30 @@ class NamecheapExceptionCodes {
 		5050900 => 'Unhandled exceptions',
 
 		# namecheap.ssl.reissue
-		2010326 'Error while validating administrative address',
-		2011294 'CertificateID is invalid',
-		4011294 'CertificateID is invalid',
-		2019331 'Certificate status is not available',
-		4011331 'Certificate status is invalid',
-		4011297 'WebServerType is invalid',
-		2011297 'WebServerType is invalid',
-		3011166 'Invalid renewal order domain',
-		3011296 'The CSR provided is invalid',
-		4024295 'Unable to update ApproverEmail in database',
-		4024331 'Unable to update status in database',
-		3028301 'Failed to purchase certificate',
-		3011295 'ApproverEmail is not valid',
-		2015182 'The contact phone is invalid. The phone number format is +NNN.NNNNNNNNNN',
-		2011300 'Validation for True Business with EV',
-		2030332 'Config file value does not support for activation',
-		2010297 'WebServerType is missing',
-		4011296 'CSR invalid error from Provider',
-		4024294 'Failed to update CertificateID',
-		4027295 'Failed to send ApproverEmail',
-		2011510 'Partner name is invalid',
-		5050900 'Unhandled exceptions',
-		2011333 'xmlfile is missing error while getting xml form from filepath and xmlstring from config file',
-		4050900 'Unhandled exception from database error',
+		2010326 => 'Error while validating administrative address',
+		2011294 => 'CertificateID is invalid',
+		4011294 => 'CertificateID is invalid',
+		2019331 => 'Certificate status is not available',
+		4011331 => 'Certificate status is invalid',
+		4011297 => 'WebServerType is invalid',
+		2011297 => 'WebServerType is invalid',
+		3011166 => 'Invalid renewal order domain',
+		3011296 => 'The CSR provided is invalid',
+		4024295 => 'Unable to update ApproverEmail in database',
+		4024331 => 'Unable to update status in database',
+		3028301 => 'Failed to purchase certificate',
+		3011295 => 'ApproverEmail is not valid',
+		2015182 => 'The contact phone is invalid. The phone number format is +NNN.NNNNNNNNNN',
+		2011300 => 'Validation for True Business with EV',
+		2030332 => 'Config file value does not support for activation',
+		2010297 => 'WebServerType is missing',
+		4011296 => 'CSR invalid error from Provider',
+		4024294 => 'Failed to update CertificateID',
+		4027295 => 'Failed to send ApproverEmail',
+		2011510 => 'Partner name is invalid',
+		5050900 => 'Unhandled exceptions',
+		2011333 => 'xmlfile is missing error while getting xml form from filepath and xmlstring from config file',
+		4050900 => 'Unhandled exception from database error',
 
 		# namecheap.ssl.getApproverEmailList
 		2011296 => 'CSR is invalid',
@@ -451,5 +457,3 @@ class NamecheapExceptionCodes {
 	];
 
 }
-
-?>

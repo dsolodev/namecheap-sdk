@@ -1,111 +1,132 @@
-<?php 
+<?php
+
+declare(strict_types=1);
 
 namespace Namecheap\Domain;
 
 use Namecheap\Api;
-use Namecheap\Exception\NamecheapException;
 /**
- * Namecheap API wrapper
- *
- * Method DomainsDns
- * Manage Domains DNS
+ * Namecheap API wrapper - Domain DNS management
  *
  * @author Saddam Hossain <saddamrhossain@gmail.com>
- *
- * @version 1
+ * @version 2.0
  */
-class DomainsDns extends Api {
+final class DomainsDns extends Api
+{
 
-	protected $command = 'namecheap.domains.dns.';
+    protected string $command = 'namecheap.domains.dns.';
 
-	/**
-	 * @todo Sets domain to use our default DNS servers. Required for free services like Host record management, URL forwarding, email forwarding, dynamic dns and other value added services.
-	 *
-	 * @param str|SLD|Req : SLD of the DomainName
-	 * @param str|TLD|Req : TLD of the DomainName
-	 */
-	public function setDefault($std, $tld) {
-		return $this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld]);
-	}
+    /**
+     * Sets domain to use default DNS servers
+     *
+     * Required for free services like Host record management, URL forwarding,
+     * email forwarding, dynamic DNS and other value added services.
+     *
+     * @param string $sld SLD (Second Level Domain) of the domain name
+     * @param string $tld TLD (Top Level Domain) of the domain name
+     */
+    public function setDefault(string $sld, string $tld): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, ['SLD' => $sld, 'TLD' => $tld]);
+    }
 
-	/**
-	 * @todo Sets domain to use custom DNS servers. NOTE: Services like URL forwarding, Email forwarding, Dynamic DNS will not work for domains using custom nameservers.
-	 *
-	 * @param str|SLD|Req : SLD of the DomainName
-	 * @param str|TLD|Req : TLD of the DomainName
-	 * @param str|Nameservers|Req : A comma-separated list of name servers to be associated with this domain
-	 * 
-	 * @NOTE: Services like URL forwarding, Email forwarding, Dynamic DNS will not work for domains using custom nameservers
-	 */
-	public function setCustom($std, $tld, $ns) {
-		return $this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld, 'Nameservers' => $ns]);
-	}
+    /**
+     * Sets domain to use custom DNS servers
+     *
+     * @param string $sld SLD (Second Level Domain) of the domain name
+     * @param string $tld TLD (Top Level Domain) of the domain name
+     * @param string $nameservers Comma-separated list of name servers
+     *
+     * @note Services like URL forwarding, Email forwarding, Dynamic DNS will not work
+     *       for domains using custom nameservers
+     */
+    public function setCustom(string $sld, string $tld, string $nameservers): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, [
+            'SLD' => $sld,
+            'TLD' => $tld,
+            'Nameservers' => $nameservers,
+        ]);
+    }
 
-	/**
-	 * @todo Gets a list of DNS servers associated with the requested domain
-	 *
-	 * @param str|SLD|Req : SLD of the DomainName
-	 * @param str|TLD|Req : TLD of the DomainName
-	 */
-	public function getList($std, $tld) {
-		return $this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld]);
-	}
+    /**
+     * Gets a list of DNS servers associated with the requested domain
+     *
+     * @param string $sld SLD (Second Level Domain) of the domain name
+     * @param string $tld TLD (Top Level Domain) of the domain name
+     */
+    public function getList(string $sld, string $tld): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, ['SLD' => $sld, 'TLD' => $tld]);
+    }
 
-	/**
-	 * @todo Retrieves DNS host record settings for the requested domain
+    /**
+     * Retrieves DNS host record settings for the requested domain
+     *
+     * @param string $sld SLD (Second Level Domain) of the domain name
+     * @param string $tld TLD (Top Level Domain) of the domain name
+     */
+    public function getHosts(string $sld, string $tld): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, ['SLD' => $sld, 'TLD' => $tld]);
+    }
 
-	 * @param str|SLD|Req : SLD of the DomainName
-	 * @param str|TLD|Req : TLD of the DomainName
-	 */
-	public function getHosts($std, $tld) {
-		return $this->get($this->command.__FUNCTION__, ['SLD' => $std, 'TLD' => $tld]);
-	}
+    /**
+     * Gets email forwarding settings for the requested domain
+     *
+     * @param string $domainName Domain name to get settings for
+     */
+    public function getEmailForwarding(string $domainName): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, ['DomainName' => $domainName]);
+    }
 
-	/**
-	 * @todo Gets email forwarding settings for the requested domain
-	 * 
-	 * @param str|DomainName|req : Domain name to get settings
-	 */
-	public function getEmailForwarding($domainName) {
-		return $this->get($this->command.__FUNCTION__, ['DomainName' => $domainName]);
-	}
+    /**
+     * Sets email forwarding for a domain name
+     *
+     * @param string $domainName Domain name to set settings for
+     * @param array $mailBox Mailboxes to set forwarding for
+     *                      Example: ['mailbox1' => 'info', 'mailbox2' => 'careers']
+     * @param array $forwardTo Email addresses to forward to
+     *                        Example: ['ForwardTo1' => 'info@example.com', 'ForwardTo2' => 'careers@example.com']
+     */
+    public function setEmailForwarding(string $domainName, array $mailBox, array $forwardTo): string|array
+    {
+        $data = ['DomainName' => $domainName];
+        return $this->get($this->command . __FUNCTION__, array_merge($data, $mailBox, $forwardTo));
+    }
 
-	/**
-	 * @todo Sets email forwarding for a domain name
-	 *
-	 * @param str|DomainName|req : Domain name to set settings
-	 * @param str|MailBox[1..n]|req : MailBox for which you wish to set email forwarding. For example:example@namecheap.com
-	 * @param str|ForwardTo[1..n]|req : Email address to forwardto.For example:example@gmail.com
-	 *
-	 * @NOTE: The [ ] brackets are used to represent optional values (e.g.[1...n]). Do not include the [ ] brackets in your API requests.Please refer to the example API request given below.
-	 */
-	public function setEmailForwarding($domainName, array $mailBox, array $forwardTo) {
-		# mailBox Example : ['mailbox1' => 'info', 'mailbox2' => 'careers'];
-		# ForwardTo Example : ['ForwardTo1' => 'domaininfo@gmail.com', 'ForwardTo2' => 'domaincareer@gmail.com'];
-		$data = ['DomainName' => $domainName];
-		return $this->get($this->command.__FUNCTION__, array_merge($data, $mailBox, $forwardTo));
-	}
-
-	/**
-	 * @todo Sets DNS host records settings for the requested domain.
-	 * @IMPORTANT:  We recommend you use HTTPPOST method when setting more than 10 hostnames. All host records that are not included into the API call will be deleted, so add them in addition to new host records.
-	 * 
-	 * @param str|SLD|req : SLD of the domain to setHosts
-	 * @param str|TLD|req : TLD of the domain to setHosts
-	 * @param str|HostName[1..n]|req : Sub-domain/hostname to create the record for
-	 * @param str|RecordType[1..n]|req : Possible values: A, AAAA, CNAME, MX, MXE, NS, TXT, URL, URL301, FRAME
-	 * @param str|Address[1..n]|req : Possible values are URL or IP address. The value for this parameter is based on RecordType.
-	 * @param str|MXPref[1..n]|req : MX preference for host. Applicable for MX records only.
-	 *
-	 * @param str|EmailType|opt : Possible values are MXE, MX, FWD, OX
-	 * @param str|TTL[1..n]|opt : Time to live for all record types.Possible values: any value between 60 to 60000 Default Value: 1800
-	 *
-	 * @NOTE: The [ ] brackets are used to represent optional values (e.g.[1...n]). Do not include the [ ] brackets in your API requests.
-	 */
-	public function setHosts($sld, $tld, array $hostName, array $recordType, array $address, array $mXPref, $emailType=null, array $ttl=[]) {
-		$data = ['SLD' => $sld, 'TLD' => $tld, 'EmailType' => $emailType];
-		return $this->post($this->command.__FUNCTION__, array_merge($data, $hostName, $recordType, $address, $mXPref, $ttl));
-	}
+    /**
+     * Sets DNS host records settings for the requested domain
+     *
+     * @param string $sld SLD (Second Level Domain) of the domain
+     * @param string $tld TLD (Top Level Domain) of the domain
+     * @param array $hostName Sub-domain/hostname to create records for
+     * @param array $recordType Record types: A, AAAA, CNAME, MX, MXE, NS, TXT, URL, URL301, FRAME
+     * @param array $address URL or IP address values based on record type
+     * @param array $mxPref MX preference values (applicable for MX records only)
+     * @param string|null $emailType Email type: MXE, MX, FWD, OX (optional)
+     * @param array $ttl Time to live values (60-60000, default: 1800)
+     *
+     * @important Use HTTP POST method when setting more than 10 hostnames.
+     *           All host records not included in the API call will be deleted.
+     */
+    public function setHosts(
+        string $sld,
+        string $tld,
+        array $hostName,
+        array $recordType,
+        array $address,
+        array $mxPref,
+        ?string $emailType = null,
+        array $ttl = []
+    ): string|array {
+        $data = [
+            'SLD' => $sld,
+            'TLD' => $tld,
+            'EmailType' => $emailType,
+        ];
+        return $this->post($this->command . __FUNCTION__, array_merge($data, $hostName, $recordType, $address, $mxPref, $ttl));
+    }
 }
 
-?>

@@ -1,201 +1,276 @@
-<?php 
+<?php
+
+declare(strict_types=1);
 
 namespace Namecheap\Ssl;
 
 use Namecheap\Api;
-use Namecheap\Exception\NamecheapException;
 /**
- * Namecheap API wrapper
- *
- * Method Ssl
- * Manage Ssl
+ * Namecheap API wrapper - SSL certificate management
  *
  * @author Saddam Hossain <saddamrhossain@gmail.com>
- *
- * @version 1
+ * @version 2.0
  */
-class Ssl extends Api {
+final class Ssl extends Api
+{
+    protected string $command = "namecheap.ssl.";
 
-	protected $command = 'namecheap.ssl.';
-	
-	/**
-	 * @todo Creates a new SSL certificate.
-	 * @param num|Years|req : Number of years SSL will be issued for Allowed values: 1,2
-	 * @param str|Type|req : SSL product name. See "Possible values for Type parameter" below this list.
-	 * @param num|SANStoADD|opt : Defines number of add-on domains to be purchased in addition to the default number of domains included into a multi-domain certificate. 
-	 * @param str|PromotionCode|opt : Promotional (coupon) code for the certificate
-	 *
-	 ### Possible values for Type parameter:
-			PositiveSSL, EssentialSSL, InstantSSL, InstantSSL Pro, PremiumSSL, EV SSL, PositiveSSL Wildcard, EssentialSSL Wildcard, PremiumSSL Wildcard, PositiveSSL Multi Domain, Multi Domain SSL, Unified Communications, EV Multi Domain SSL.
-	 */
-	public function create($years, $type, $sANStoADD=null, $promotionCode=null) {
-		$data = [
-			'Years' => $years,
-			'Type' => $type,
-			'SANStoADD' => $sANStoADD,
-			'PromotionCode' => $promotionCode,
-		];
+    /**
+     * Creates a new SSL certificate
+     *
+     * @param int $years Number of years SSL will be issued for (1-2)
+     * @param string $type SSL product name (see supported types below)
+     * @param int|null $sansToAdd Number of add-on domains for multi-domain certificates
+     * @param string|null $promotionCode Promotional (coupon) code for the certificate
+     *
+     * Supported SSL types: PositiveSSL, EssentialSSL, InstantSSL, InstantSSL Pro,
+     * PremiumSSL, EV SSL, PositiveSSL Wildcard, EssentialSSL Wildcard,
+     * PremiumSSL Wildcard, PositiveSSL Multi Domain, Multi Domain SSL,
+     * Unified Communications, EV Multi Domain SSL
+     */
+    public function create(
+        int $years,
+        string $type,
+        ?int $sansToAdd = null,
+        ?string $promotionCode = null
+    ): string|array {
+        $data = [
+            "Years" => $years,
+            "Type" => $type,
+            "SANStoADD" => $sansToAdd,
+            "PromotionCode" => $promotionCode,
+        ];
+        return $this->get($this->command . __FUNCTION__, $data);
+    }
 
-		return $this->get($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Returns a list of SSL certificates for the particular user.
-	 *
-	 * @param str|ListType|opt : Possible values are ALL,Processing,EmailSent,TechnicalProblem,InProgress, Completed,Deactivated,Active,Cancelled,NewPurchase, NewRenewal. Default Value: All
-	 * @param str|SearchTerm|opt : Keyword to look for on the SSL list
-	 * @param num|Page|opt : Page to return Default Value: 1
-	 * @param num|PageSize|opt : Total number of SSL certificates to display in a page. Minimum value is 10 and maximum value is 100. Default Value: 20
-	 * @param str|SortBy|opt : Possible values are PURCHASEDATE, PURCHASEDATE_DESC, SSLTYPE, SSLTYPE_DESC, EXPIREDATETIME, EXPIREDATETIME_DESC,Host_Name, Host_Name_DESC.
-	 */
-	public function getList($listType=null, $searchTerm=null, $page=null, $pageSize=null, $sortBy=null) {
-		$data = [
-			'ListType' => $listType,
-			'SearchTerm' => $searchTerm,
-			'Page' => $page,
-			'PageSize' => $pageSize,
-			'SortBy' => $sortBy,
-		];
-		return $this->get($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Parsers the CSR
-	 *
-	 * @param str|csr|req 			  :	Certificate Signing Request
-	 * @param str|CertificateType|req : Type of SSL Certificate
-		Possible values for CertificateType parameter:
-			InstantSSL, PositiveSSL, PositiveSSL Wildcard, EssentialSSL, EssentialSSL Wildcard, InstantSSL Pro, PremiumSSL Wildcard, EV SSL, EV Multi Domain SSL, Multi Domain SSL, PositiveSSL Multi Domain, Unified Communications.
-	 */
-	public function parseCSR($csr, $certificateType=null) {
-		$data = [
-			'csr' => $csr,
-			'CertificateType' => $certificateType
-		];
-		return $this->post($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Gets approver email list for the requested certificate.
-	 *
-	 * @param str|DomainName|req 		: Domain name to get the list
-	 * @param str|CertificateType|req 	: Type of SSL certificate
-	 */
-	public function getApproverEmailList($domainName, $CertificateType) {
-		$data = [
-			'DomainName' => $DomainName,
-			'CertificateType' => $certificateType
-		];
-		return $this->post($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Activates a purchased and non-activated SSL certificate by collecting and validating certificate request data and submitting it to Comodo.
-	 *
-	 * @param num|CertificateID|req : Unique identifier of SSL certificate to be activated
-	 * @param str|CSR|req : Certificate Signing Request (CSR)
-	 * @param str|AdminEmailAddress|req : Email address to send signed SSL certificate file to
-	 * @param str|WebServerType|opt : Server software where SSL will be installed. Defines SSL certificate file format (PEM or PKCS7). Allowed values: apacheopenssl, apachessl, apacheraven, apachessleay, apache2, apacheapachessl, tomcat, cpanel, ipswitch, plesk, weblogic, website, webstar, nginx, iis, iis4, iis5, c2net, ibmhttp, iplanet, domino, dominogo4625, dominogo4626, netscape, zeusv3, cobaltseries, ensim, hsphere, other
-	 *
-	 ## Command can be run on purchased and non-activated SSLs in "Newpurchase" or "Newrenewal" status. Use getInfo and getList APIs to collect SSL status.
-	 ## Only supported products can be activated. See create API to learn supported products.
-	 ## Sandbox limitation: Activation process works for all certificates. However, an actual test certificate will not be returned for OV and EV certificates.
-	 */
-	public function activate() {
+    /**
+     * Returns a list of SSL certificates for the user
+     *
+     * @param string|null $listType Filter type: ALL, Processing, EmailSent, TechnicalProblem,
+     *                             InProgress, Completed, Deactivated, Active, Cancelled,
+     *                             NewPurchase, NewRenewal (default: ALL)
+     * @param string|null $searchTerm Keyword to search for in SSL list
+     * @param int|null $page Page to return (default: 1)
+     * @param int|null $pageSize Certificates per page, min 10, max 100 (default: 20)
+     * @param string|null $sortBy Sort order: PURCHASEDATE, PURCHASEDATE_DESC, SSLTYPE,
+     *                           SSLTYPE_DESC, EXPIREDATETIME, EXPIREDATETIME_DESC,
+     *                           Host_Name, Host_Name_DESC
+     */
+    public function getList(
+        ?string $listType = null,
+        ?string $searchTerm = null,
+        ?int $page = null,
+        ?int $pageSize = null,
+        ?string $sortBy = null
+    ): string|array {
+        $data = [
+            "ListType" => $listType,
+            "SearchTerm" => $searchTerm,
+            "Page" => $page,
+            "PageSize" => $pageSize,
+            "SortBy" => $sortBy,
+        ];
+        return $this->get($this->command . __FUNCTION__, $data);
+    }
 
-		return false;
-	}
-	
-	/**
-	 * @todo Resends the approver email.
-	 * @param str|CertificateID|req : The unique certificate ID that you get after calling ssl.create command
-	 */
-	public function resendApproverEmail($certificateID) {
-		return $this->get($this->command.__FUNCTION__, ['CertificateID'=> $certificateID]);
-	}
-	
-	/**
-	 * @todo Retrieves information about the requested SSL certificate
-	 *
-	 * @param num|CertificateID|req 	: Unique ID of the SSL certificate
-	 * @param str|Returncertificate|opt : A flag for returning certificate in response
-	 * @param str|Returntype|opt 		: Type of returned certificate. Parameter takes “Individual” (for X.509 format) or “PKCS7” values.
-	 */
-	public function getInfo($certificateID, $returncertificate=null, $returntype=null) {
-		$data = [
-			'CertificateID' => $certificateID,
-			'Returncertificate' => $returncertificate,
-			'Returntype' => $returntype,
-		];
-		return $this->get($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Renews an SSL certificate.
-	 *
-	 * @param str|CertificateID|req : Unique ID of the SSL certificate you wish to renew
-	 * @param str|Years|req : Number of years renewal SSL will be issued for Allowed values: 1,2
-	 * @param str|SSLType|req : SSL product name. See "Possible values for SSLType parameter" below this table.
-	 * @param str|PromotionCode|opt : Promotional (coupon) code for the certificate
-	 */
-	public function renew($certificateID, $years, $sSLType, $promotionCode=null) {
-		$data = [
-			'CertificateID' => $certificateID,
-			'Years' => $years,
-			'SSLType' => $sSLType,
-			'PromotionCode' => $promotionCode,
-		];
+    /**
+     * Parses the Certificate Signing Request (CSR)
+     *
+     * @param string $csr Certificate Signing Request
+     * @param string|null $certificateType Type of SSL certificate
+     *
+     * Supported certificate types: InstantSSL, PositiveSSL, PositiveSSL Wildcard,
+     * EssentialSSL, EssentialSSL Wildcard, InstantSSL Pro, PremiumSSL Wildcard,
+     * EV SSL, EV Multi Domain SSL, Multi Domain SSL, PositiveSSL Multi Domain,
+     * Unified Communications
+     */
+    public function parseCSR(
+        string $csr,
+        ?string $certificateType = null
+    ): string|array {
+        $data = [
+            "csr" => $csr,
+            "CertificateType" => $certificateType,
+        ];
+        return $this->post($this->command . __FUNCTION__, $data);
+    }
 
-		return $this->post($this->command.__FUNCTION__, $data);
-	}
-	
-	/**
-	 * @todo Initiates creation of a new certificate version of an active SSL certificate by collecting and validating new certificate request data and submitting it to Comodo.
-	 *
-	 * 
-	 */
-	public function reissue() {
-		return false;
-	}
-	
-	/**
-	 * @todo Resends the fulfilment email containing the certificate.
-	 * @param str|CertificateID|req : The unique certificate ID that you get after calling ssl.create command
-	 */
-	public function resendfulfillmentemail($certificateID) {
-		return $this->get($this->command.__FUNCTION__, ['CertificateID'=> $certificateID]);
-	}
-	
-	/**
-	 * @todo Purchases more add-on domains for already purchased certificate.
-	 *
-	 * @param num|CertificateID|req : ID of the certificate for which you wish to purchase more add-on domains
-	 * @param num|NumberOfSANSToAdd|req : Number of add-on domains to be ordered
-	 */
-	public function purchasemoresans($certificateID, $numberOfSANSToAdd) {
-		return $this->get($this->command.__FUNCTION__, ['CertificateID'=> $certificateID, 'NumberOfSANSToAdd' => $numberOfSANSToAdd]);
-	}
-	
-	/**
-	 * @Important This function is currently supported for Comodo certificates only.
-	 * @todo Revokes a re-issued SSL certificate.
-	 * 
-	 * @param num|CertificateID|req 	: ID of the certificate for you wish to revoke Default Value: 1
-	 * @param str|CertificateType|req 	: Type of SSL Certificate
-	 	Possible values for Type parameter:
-		InstantSSL, PositiveSSL, PositiveSSL Wildcard, EssentialSSL, EssentialSSL Wildcard, InstantSSL Pro, PremiumSSL Wildcard, EV SSL, EV Multi Domain SSL, Multi Domain SSL, PositiveSSL Multi Domain, Unified Communications.
-	 */
-	public function revokecertificate($certificateID, $certificateType) {
-		return $this->get($this->command.__FUNCTION__, ['CertificateID'=> $certificateID, 'CertificateType' => $certificateType]);
-	}
+    /**
+     * Gets approver email list for the requested certificate
+     *
+     * @param string $domainName Domain name to get the list for
+     * @param string $certificateType Type of SSL certificate
+     */
+    public function getApproverEmailList(
+        string $domainName,
+        string $certificateType
+    ): string|array {
+        $data = [
+            "DomainName" => $domainName,
+            "CertificateType" => $certificateType,
+        ];
+        return $this->post($this->command . __FUNCTION__, $data);
+    }
 
-	/**
-	 * @todo Sets new domain control validation (DCV) method for a certificate or serves as 'retry' mechanism
-	 */
-	public function editDCVMethod() {
-		return false;
-	}
+    /**
+     * Activates a purchased and non-activated SSL certificate
+     *
+     * Collects and validates certificate request data and submits it to Comodo.
+     *
+     * @param int $certificateId Unique identifier of SSL certificate to be activated
+     * @param string $csr Certificate Signing Request (CSR)
+     * @param string $adminEmailAddress Email address to send signed SSL certificate file to
+     * @param string|null $webServerType Server software where SSL will be installed
+     *
+     * Supported web server types: apacheopenssl, apachessl, apacheraven, apachessleay,
+     * apache2, apacheapachessl, tomcat, cpanel, ipswitch, plesk, weblogic, website,
+     * webstar, nginx, iis, iis4, iis5, c2net, ibmhttp, iplanet, domino, dominogo4625,
+     * dominogo4626, netscape, zeusv3, cobaltseries, ensim, hsphere, other
+     *
+     * @note Command can be run on purchased and non-activated SSLs in "Newpurchase" or "Newrenewal" status
+     * @note Only supported products can be activated. See create API to learn supported products
+     * @note Sandbox limitation: Activation process works for all certificates. However, an actual test certificate will not be returned for OV and EV certificates
+     * @note This method is not yet implemented
+     */
+    public function activate(
+        int $certificateId,
+        string $csr,
+        string $adminEmailAddress,
+        ?string $webServerType = null
+    ): bool {
+        return false;
+    }
 
+    /**
+     * Resends the approver email
+     *
+     * @param int $certificateId Unique certificate ID from ssl.create command
+     */
+    public function resendApproverEmail(int $certificateId): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, [
+            "CertificateID" => $certificateId,
+        ]);
+    }
+
+    /**
+     * Retrieves information about the requested SSL certificate
+     *
+     * @param int $certificateId Unique ID of the SSL certificate
+     * @param string|null $returnCertificate Flag for returning certificate in response
+     * @param string|null $returnType Type of returned certificate: Individual (X.509) or PKCS7
+     */
+    public function getInfo(
+        int $certificateId,
+        ?string $returnCertificate = null,
+        ?string $returnType = null
+    ): string|array {
+        $data = [
+            "CertificateID" => $certificateId,
+            "Returncertificate" => $returnCertificate,
+            "Returntype" => $returnType,
+        ];
+        return $this->get($this->command . __FUNCTION__, $data);
+    }
+
+    /**
+     * Renews an SSL certificate
+     *
+     * @param int $certificateId Unique ID of the SSL certificate to renew
+     * @param int $years Number of years to renew for (1-2)
+     * @param string $sslType SSL product name (see supported types in create method)
+     * @param string|null $promotionCode Promotional (coupon) code for the certificate
+     */
+    public function renew(
+        int $certificateId,
+        int $years,
+        string $sslType,
+        ?string $promotionCode = null
+    ): string|array {
+        $data = [
+            "CertificateID" => $certificateId,
+            "Years" => $years,
+            "SSLType" => $sslType,
+            "PromotionCode" => $promotionCode,
+        ];
+        return $this->post($this->command . __FUNCTION__, $data);
+    }
+
+    /**
+     * Initiates creation of a new certificate version of an active SSL certificate
+     *
+     * Collects and validates new certificate request data and submits it to Comodo.
+     *
+     * @param int $certificateId Unique identifier of SSL certificate to be reissued
+     * @param string $csr Certificate Signing Request (CSR)
+     * @param string $adminEmailAddress Email address to send signed SSL certificate file to
+     * @param string|null $webServerType Server software where SSL will be installed
+     *
+     * @note This method is not yet implemented
+     */
+    public function reissue(
+        int $certificateId,
+        string $csr,
+        string $adminEmailAddress,
+        ?string $webServerType = null
+    ): bool {
+        return false;
+    }
+
+    /**
+     * Resends the fulfilment email containing the certificate
+     *
+     * @param int $certificateId Unique certificate ID from ssl.create command
+     */
+    public function resendFulfillmentEmail(int $certificateId): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, [
+            "CertificateID" => $certificateId,
+        ]);
+    }
+
+    /**
+     * Purchases more add-on domains for already purchased certificate
+     *
+     * @param int $certificateId ID of the certificate to purchase more add-on domains for
+     * @param int $numberOfSansToAdd Number of add-on domains to be ordered
+     */
+    public function purchaseMoreSans(int $certificateId, int $numberOfSansToAdd): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, [
+            "CertificateID" => $certificateId,
+            "NumberOfSANSToAdd" => $numberOfSansToAdd,
+        ]);
+    }
+
+    /**
+     * Revokes a re-issued SSL certificate (Comodo certificates only)
+     *
+     * @param int $certificateId ID of the certificate to revoke
+     * @param string $certificateType Type of SSL certificate
+     *
+     * Supported certificate types: InstantSSL, PositiveSSL, PositiveSSL Wildcard,
+     * EssentialSSL, EssentialSSL Wildcard, InstantSSL Pro, PremiumSSL Wildcard,
+     * EV SSL, EV Multi Domain SSL, Multi Domain SSL, PositiveSSL Multi Domain,
+     * Unified Communications
+     */
+    public function revokeCertificate(int $certificateId, string $certificateType): string|array
+    {
+        return $this->get($this->command . __FUNCTION__, [
+            "CertificateID" => $certificateId,
+            "CertificateType" => $certificateType,
+        ]);
+    }
+
+    /**
+     * Sets new domain control validation (DCV) method for a certificate
+     *
+     * This method serves as a 'retry' mechanism for DCV validation.
+     *
+     * @note This method is not yet implemented
+     */
+    public function editDcvMethod(): bool
+    {
+        return false;
+    }
 }
-
-?>
