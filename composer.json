@@ -1,0 +1,31 @@
+{
+  "name": "dsolodev/namecheap-sdk",
+  "description": "PHP 8.4 SDK library for Namecheap APIs",
+  "type": "library",
+  "version": "1.0",
+  "license": "MIT",
+  "keywords": [
+    "Namecheap",
+    "API",
+    "Namecheap SDK",
+    "Namecheap PHP",
+    "Namecheap PHP SDK"
+  ],
+  "authors": [
+    {
+      "name": "Joeseph Chen",
+      "email": "joeseph.chens@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Namecheap\\": "src"
+    }
+  },
+  "require": {
+    "php": "^8.4",
+    "ext-curl": "*",
+    "ext-dom": "*"
+  },
+  "require-dev": {}
+}
