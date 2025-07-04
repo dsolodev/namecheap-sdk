@@ -1,6 +1,6 @@
 {
   "name": "dsolodev/namecheap-sdk",
-  "description": "Namecheap APIs SDK for PHP 8.4 is a modern, type-safe package to manage Namecheap APIs. This is a complete refactor\nusing modern PHP practices and service pattern architecture.",
+  "description": "Namecheap APIs SDK for PHP 8.4 is a modern, type-safe package to manage Namecheap APIs.",
   "type": "library",
   "version": "1.0",
   "license": "MIT",
