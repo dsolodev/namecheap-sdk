@@ -36,7 +36,7 @@ using modern PHP practices and service pattern architecture.
 The recommended way to install Namecheap SDK is through [Composer](http://getcomposer.org):
 
 ```bash
-composer require dsolodev/namecheap-php-sdk
+composer require dsolodev/namecheap-sdk
 ```
 
 ## 🚀 Quick Start
